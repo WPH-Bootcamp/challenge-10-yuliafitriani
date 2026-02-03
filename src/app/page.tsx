@@ -1,25 +1,43 @@
-/**
- * Home Page
- * 
- * TODO: Implement homepage sesuai dengan design Figma
- * - Tampilkan daftar artikel blog
- * - Implement search/filter jika diperlukan
- * - Handle loading dan error states
- */
+"use client";
+
+import Header from "@/components/template/Header";
+import Footer from "@/components/template/Footer";
+import { ArticleTemplate } from "@/components/template/ArticleTemplate";
+import { useRecommendedArticles } from "@/hooks/useArticle";
+import type { ArticleParams } from "@/types/article";
+import { useState } from "react";
+import { PaginationCompact } from "@/components/molecules/PaginationCompact";
 
 export default function Home() {
+  const [page, setPage] = useState(1);
+  const params: ArticleParams = {
+    page: page,
+    limit: 10,
+  };
+  const query = useRecommendedArticles(params);
   return (
-    <div className="min-h-screen">
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Blog App Challenge</h1>
-        
-        {/* TODO: Implement blog posts list here */}
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            Mulai implementasi homepage di sini sesuai dengan design Figma!
-          </p>
+    <div className="">
+      <Header />
+
+      {/* Konten utama scrollable */}
+      <main className="flex-1 overflow-y-auto container mx-auto p-4">
+        <ArticleTemplate
+          title="Recommended For You"
+          articles={query.data?.data}
+          isLoading={query.isLoading}
+          isFetching={query.isFetching}
+          isError={query.isError}
+          onRetry={() => query.refetch()}
+        />
+        <div className="my-4">
+          <PaginationCompact
+            currentPage={page}
+            totalPages={query.data?.lastPage || 1}
+            onPageChange={setPage}
+          />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
