@@ -29,3 +29,9 @@ export type ArticleResponse = {
   page: number;
   lastPage: number;
 };
+
+export type ArticleSearchParams = {
+  query: string;
+  limit: number;
+  page: number;
+};
