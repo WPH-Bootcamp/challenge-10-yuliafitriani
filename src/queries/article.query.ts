@@ -3,6 +3,7 @@ import {
   ArticleRecomendedApi,
   ArticleMostLikedApi,
   ArticleSearchApi,
+  ArticleMyPostApi,
 } from "@/lib/article.api";
 
 const articleRecommendedQueryKey = {
@@ -23,6 +24,12 @@ const articleSearchQueryKey = {
     [...articleSearchQueryKey.all, "list", params] as const,
 };
 
+const articleMyPostQueryKey = {
+  all: ["myPostArticles"] as const,
+  list: (params: { limit: number; page: number }) =>
+    [...articleMyPostQueryKey.all, "list", params] as const,
+};
+
 type RecomendedArticlesListKey = ReturnType<
   typeof articleRecommendedQueryKey.list
 >;
@@ -32,6 +39,7 @@ type MostLikedArticlesListKey = ReturnType<
 >;
 
 type SearchArticlesListKey = ReturnType<typeof articleSearchQueryKey.list>;
+type MyPostArticlesListKey = ReturnType<typeof articleMyPostQueryKey.list>;
 
 const articleRecommendedQueryFn = async ({
   queryKey,
@@ -54,6 +62,13 @@ const articleSearchQueryFn = async ({
   return ArticleSearchApi(params);
 };
 
+const articleMyPostQueryFn = async ({
+  queryKey,
+}: QueryFunctionContext<MyPostArticlesListKey>) => {
+  const [, , params] = queryKey;
+  return ArticleMyPostApi(params);
+};
+
 export {
   articleRecommendedQueryKey,
   articleRecommendedQueryFn,
@@ -61,4 +76,6 @@ export {
   articleMostLikedQueryFn,
   articleSearchQueryKey,
   articleSearchQueryFn,
+  articleMyPostQueryKey,
+  articleMyPostQueryFn,
 };

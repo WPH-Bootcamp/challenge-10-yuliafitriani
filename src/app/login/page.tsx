@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -13,43 +12,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/atoms/PasswordInput";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthLogin } from "@/hooks/useAuthLogin";
 import { useRouter } from "next/navigation";
 
 const Login = () => {
-  const route = useRouter();
+  const router = useRouter();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
+  const { mutate, isPending, isSuccess, error } = useAuthLogin();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.id]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
 
-  const { mutate, isPending } = useAuthLogin();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = () => {
-    mutate(
-      {
-        email: form.email,
-        password: form.password,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Login successsful");
-
-          setTimeout(() => {
-            route.push("/");
-          }, 1000);
-        },
-        onError: (error: Error) => {
-          toast.error(error.message);
-        },
-      },
-    );
+    mutate({
+      email: form.email,
+      password: form.password,
+    });
   };
+
+  /* ================= SUCCESS / ERROR EFFECT ================= */
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Login successful");
+      router.push("/");
+    }
+  }, [isSuccess, router]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Login failed");
+    }
+  }, [error]);
 
   return (
     <div className="mx-auto min-h-screen content-center">
@@ -57,48 +59,49 @@ const Login = () => {
         <CardHeader>
           <CardTitle>Sign In</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  onChange={handleChange}
-                  value={form.email}
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <PasswordInput
-                  id="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
 
-              <div className="grid gap-2">
-                <Button
-                  type="submit"
-                  className="w-full bg-primary-300"
-                  disabled={isPending}
-                  onClick={handleSubmit}
-                >
-                  {isPending ? "Please wait..." : "Login"}
-                </Button>
-              </div>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="m@example.com"
+                required
+              />
             </div>
-          </div>
-          <CardDescription>
-            Don`t have an account? <Button variant="link">Register</Button>
-            <CardAction></CardAction>
+
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <PasswordInput
+                id="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-primary-300"
+              disabled={isPending}
+            >
+              {isPending ? "Please wait..." : "Login"}
+            </Button>
+          </form>
+
+          <CardDescription className="mt-4 text-center">
+            Don’t have an account?{" "}
+            <Button
+              variant="link"
+              type="button"
+              onClick={() => router.push("/register")}
+            >
+              Register
+            </Button>
           </CardDescription>
         </CardContent>
       </Card>

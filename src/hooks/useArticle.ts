@@ -6,6 +6,8 @@ import {
   articleMostLikedQueryFn,
   articleSearchQueryKey,
   articleSearchQueryFn,
+  articleMyPostQueryKey,
+  articleMyPostQueryFn,
 } from "@/queries/article.query";
 import type { ArticleParams, ArticleSearchParams } from "@/types/article";
 
@@ -35,6 +37,16 @@ export const useSearchArticles = (options: ArticleSearchParams) => {
   return useQuery({
     queryKey: articleSearchQueryKey.list(params),
     queryFn: articleSearchQueryFn,
+    staleTime: 1000 * 60 * 5, // 5 minutes only
+  });
+};
+
+export const useMyPostArticles = (options: ArticleParams) => {
+  const params = options;
+
+  return useQuery({
+    queryKey: articleMyPostQueryKey.list(params),
+    queryFn: articleMyPostQueryFn,
     staleTime: 1000 * 60 * 5, // 5 minutes only
   });
 };

@@ -1,23 +1,35 @@
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArticleAction } from "@/components/molecules/ArticleAction";
+import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import type { Article } from "@/types/article";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { AlertDialogDestructive } from "./AlertDialogDestructive";
 
 type Props = {
   article: Article;
+  onDelete: () => void;
 };
-const ArticleCard = ({ article }: Props) => {
-  const date = new Date(article.createdAt);
+const ArticleMyPostCard = ({ article, onDelete }: Props) => {
+  const createdAt = new Date(article.createdAt);
+  const updatedAt = new Date(article.createdAt);
 
-  const dateFormatted = date.toLocaleDateString("en-GB", {
+  const createdAtFormatted = createdAt.toLocaleTimeString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const updatedAtFormatted = updatedAt.toLocaleTimeString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   const router = useRouter();
@@ -63,30 +75,29 @@ const ArticleCard = ({ article }: Props) => {
           {article.content.replace(/<[^>]+>/g, "")}
         </p>
         <div className="flex flex-row gap-3">
-          <Avatar>
-            <AvatarImage src={article.author.name} alt={article.author.name} />
-            <AvatarFallback>
-              {article.author.name?.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <Label>{article.author.name}</Label>
-          <Label>
-            <svg
-              width="4"
-              height="4"
-              viewBox="0 0 4 4"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="2" cy="2" r="2" fill="#A4A7AE" />
-            </svg>
-          </Label>
-          <Label>{dateFormatted}</Label>
+          <span className="text-xs text-neutral-700">
+            Created {createdAtFormatted}
+          </span>
+          <Separator orientation="vertical" />
+          <span className="text-xs text-neutral-700">
+            Last Updated {updatedAtFormatted}
+          </span>
         </div>
-        <ArticleAction likes={article.likes} comments={article.comments} />
+        <div className="flex flex-row -mx-4">
+          <Button variant="link">Statistic</Button>
+          <Separator orientation="vertical" />
+          <Button variant="link">Edit</Button>
+          <Separator orientation="vertical" />
+
+          <AlertDialogDestructive
+            title="Delete post?"
+            description="Are you sure you want to delete this post? This cannot be undone."
+            onDelete={onDelete}
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-export default ArticleCard;
+export default ArticleMyPostCard;

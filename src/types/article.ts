@@ -35,3 +35,10 @@ export type ArticleSearchParams = {
   limit: number;
   page: number;
 };
+
+export type ArticleCreatePayload = {
+  title: string;
+  content: string;
+  tags: string[];
+  image: File;
+};

@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "cdn.aglty.io",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
     ],
   },
 };
