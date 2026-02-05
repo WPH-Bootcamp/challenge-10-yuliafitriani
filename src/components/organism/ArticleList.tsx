@@ -1,3 +1,5 @@
+"use client";
+
 import type { Article } from "@/types/article";
 import ArticleCard from "@/components/molecules/ArticleCard";
 import ArticleMyPostCard from "@/components/molecules/ArticleMyPostCard";
@@ -9,7 +11,7 @@ type Props = {
 
 type MyPostProps = {
   articles?: Article[] | null | undefined;
-  onDelete: () => void;
+  onDelete: (id: number) => void;
 };
 
 export const ArticleList = ({ articles }: Props) => {
@@ -48,7 +50,7 @@ export const ArticleMyPostList = ({ articles, onDelete }: MyPostProps) => {
           <ArticleMyPostCard
             key={article.id}
             article={article}
-            onDelete={onDelete}
+            onDelete={() => onDelete(article.id)} // call page handler
           />
         ))
       ) : (

@@ -17,10 +17,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { useMe } from "@/queries/useMe";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PasswordInput } from "@/components/atoms/PasswordInput";
 import { useMyPostArticles } from "@/hooks/useArticle";
 import { useState } from "react";
 import type { ArticleParams } from "@/types/article";
 import { ArticleMyPostList } from "@/components/organism/ArticleList";
+import { useArticleDelete } from "@/hooks/useArticleDelete";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const ProfileTemplate = () => {
   const { data: user } = useMe();
@@ -30,13 +34,25 @@ export const ProfileTemplate = () => {
     limit: 10,
   };
 
-  const handleDelete = () => {
-    setPage(2);
+  const queryClient = useQueryClient();
+  const myPostQuery = useMyPostArticles(params);
+
+  const deleteMutation = useArticleDelete();
+
+  const handleDelete = (id: number) => {
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Data has been deleted.");
+        queryClient.invalidateQueries({ queryKey: ["myPostArticles"] });
+      },
+      onError: (err: Error) => {
+        toast.error(err.message);
+      },
+    });
   };
 
-  const myPostQuery = useMyPostArticles(params);
   return (
-    <div className="w-full lg:w-3xl mx-auto my-4 flex flex-col gap-8">
+    <div className="w-full lg:w-3xl mx-4 lg:mx-auto my-4 flex flex-col gap-8">
       <Card className="flex flex-row justify-between">
         <CardContent className="flex flex-row gap-4 items-center justify-center">
           <Avatar size="xl">
@@ -107,7 +123,54 @@ export const ProfileTemplate = () => {
             />
           </div>
         </TabsContent>
-        <TabsContent value="change_password">change_password</TabsContent>
+        <TabsContent value="change_password">
+          <div className="flex flex-col gap-4 lg:w-lg w-full mt-4">
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="currentPassword" className="font-bold">
+                  Current Password
+                </Label>
+              </div>
+              <PasswordInput
+                id="currentPassword"
+                // value={form.password}
+                // onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="newPassword" className="font-bold">
+                  New Password
+                </Label>
+              </div>
+              <PasswordInput
+                id="newPassword"
+                // value={form.confirmPassword}
+                // onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="confirmPassword" className="font-bold">
+                  Confirm Password
+                </Label>
+              </div>
+              <PasswordInput
+                id="confirmPassword"
+                // value={form.confirmPassword}
+                // onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Button type="submit" className="w-full bg-primary-300">
+                Update Password
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
