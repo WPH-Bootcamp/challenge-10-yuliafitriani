@@ -1,39 +1,34 @@
-/**
- * API Utility
- * 
- * Helper functions untuk fetch data dari backend API
- * Kamu bisa modify atau extend sesuai kebutuhan
- */
+import axios from "axios";
+import { ApiError } from "@/types/error";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+});
 
-/**
- * Generic fetch function dengan error handling
- */
-async function fetchAPI<T>(endpoint: string): Promise<T> {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`);
-    
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('API Fetch Error:', error);
-    throw error;
   }
-}
 
-// TODO: Implement API functions sesuai dengan endpoint yang tersedia
-// Contoh:
-// export async function getBlogPosts() {
-//   return fetchAPI<BlogPost[]>('/posts');
-// }
-//
-// export async function getBlogPost(id: string) {
-//   return fetchAPI<BlogPost>(`/posts/${id}`);
-// }
+  return config;
+});
 
-export { fetchAPI, API_BASE_URL };
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const apiError = error.response?.data as ApiError | undefined;
+
+    const message =
+      apiError?.details?.errors?.[0] ??
+      apiError?.message ??
+      "Something went wrong";
+
+    return Promise.reject(new Error(message));
+  },
+);
+
+export default api;
